@@ -7,8 +7,8 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 ## Current phase and capability
 
 - Phase: WP-01, project foundation and early public gate.
-- Completed capabilities: runtime foundation/local runtime compatibility; Project and ApiKey data model and migrations; Clerk account authentication and public landing page; owner-scoped project workspace.
-- Current capability checkpoint: signed-in users can create projects, list them with pagination, and open owner-scoped project details. The API guide, API key lifecycle, event ingestion, and event/request dashboards remain open.
+- Completed capabilities: runtime foundation/local runtime compatibility; Project and ApiKey data model and migrations; Clerk account authentication and public landing page; owner-scoped project workspace; API-key issuance, revocation, and replacement.
+- Current capability checkpoint: signed-in owners can create/list projects, view project details, issue one active key, revoke it, and replace it. The API guide, event ingestion, and event/request dashboards remain open.
 - TRD SP-05: pinned toolchain, Prisma client generation, schema validation, ESLint, TypeScript, and production build verified. Prisma reports both migrations applied and the database schema up to date on the configured Neon production branch.
 
 ## Completed
@@ -24,6 +24,8 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 - Replaced the starter landing page with responsive product orientation and entry points. Local HTTP smoke check returned 200 for `/`, `/sign-in`, and `/sign-up`; unauthenticated `/projects` redirected to `/sign-in`.
 - Added the signed-in project workspace, paginated project list, project creation API, and owner-scoped project detail page/API. Project creation uses server-derived Clerk ownership, request validation, same-origin checks, and an atomic per-account minute bucket. Project details expose only safe API-key display metadata.
 - Verified the project capability with ESLint, TypeScript, production build, Prisma migration status, and diff hygiene review.
+- Added owner-scoped API routes and UI for initial key issuance, revocation, and confirmed replacement. Keys use 32 random secret bytes, store only the SHA-256 hash, reveal the full value only in the successful mutation response and transient panel, and return only display hints on reads. Mutations lock the project row, check `keyVersion`, update key state atomically, and use the per-account `KEY_MUTATION` bucket.
+- Verified the key lifecycle with ESLint, TypeScript, production build, Prisma schema validation, and diff hygiene review. No authenticated key mutation was run against the configured production database.
 - Verified the configured Clerk development secret with a read-only instance request. A complete interactive account signup/signin has not yet been performed; production Clerk setup remains pending.
 
 ## Remaining capabilities
@@ -36,7 +38,7 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 ## Requirements and design references
 
 - Foundation and schema support the approved Next.js, Clerk, Prisma, Neon PostgreSQL, and Vercel design in the TRD; Project and ApiKey fields and indexes follow TRD §9.
-- PRD FR-01 is partially implemented (landing, account entry points, project create/list/detail; API guide and public deployment remain). FR-02 account authentication/session and project ownership checks are implemented. Event submission, key lifecycle, activity views, and release NFR evidence remain open.
+- PRD FR-01 is partially implemented (landing, account entry points, project create/list/detail; API guide and public deployment remain). FR-02 account authentication/session and project ownership checks are implemented. FR-04/FR-05 key issuance and revoke/replace flows are implemented. Event submission, activity views, and release NFR evidence remain open.
 - TRD SP-01 uses Clerk development credentials locally. Production Clerk domain, credentials, and fresh-account verification remain deployment work.
 
 ## Approved decisions
@@ -48,7 +50,7 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 ## Known issues and release blockers
 
 - No production domain, production Clerk configuration, Vercel deployment, abuse-control decision, support destination, budget, or recovery evidence has been configured.
-- The configured database is the Neon `production` branch. Both migrations are applied and Prisma reports the schema up to date. The authenticated project flow has not yet been exercised end to end with a fresh Clerk account.
+- The configured database is the Neon `production` branch. Both migrations are applied and Prisma reports the schema up to date. Authenticated project and key mutation flows still need end-to-end verification in a disposable development/preview database and fresh Clerk account.
 - Docker CLI is installed but its daemon is unavailable in this workspace.
 - Deployment target remains the TRD-approved Vercel path. The user asked whether Docker could be the deployment target, but has not specified local development use versus replacing Vercel; no deployment-plan change has been made.
 - `.env.example` contains placeholders only. Production authentication and deployment integration remain unverified.
@@ -59,3 +61,4 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 
 - `28010c7` — `feat: add Clerk account authentication`
 - `7eca280` — `feat: add owner-scoped project workspace`
+- `db87061` — `feat: add project API key lifecycle`
