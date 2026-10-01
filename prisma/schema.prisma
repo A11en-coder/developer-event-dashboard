@@ -8,6 +8,11 @@ datasource db {
   provider = "postgresql"
 }
 
+enum ManagementOperation {
+  PROJECT_CREATE
+  KEY_MUTATION
+}
+
 model Project {
   id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   ownerClerkUserId  String   @db.Text
@@ -31,4 +36,14 @@ model ApiKey {
   @@unique([id, projectId])
   @@unique([projectId], where: raw("\"revokedAt\" IS NULL"))
   @@index([projectId, createdAt(sort: Desc), id(sort: Desc)])
+}
+
+model ManagementBucket {
+  ownerClerkUserId String              @db.Text
+  operation        ManagementOperation
+  minuteStart      DateTime            @db.Timestamptz(6)
+  admittedCount    Int                 @default(0)
+
+  @@id([ownerClerkUserId, operation, minuteStart])
+  @@index([minuteStart])
 }

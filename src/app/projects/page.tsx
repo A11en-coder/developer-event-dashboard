@@ -1,13 +1,32 @@
 import { UserButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
+import { ProjectWorkspace } from "@/components/projects/ProjectWorkspace";
+import type { ProjectPage } from "@/lib/project-types";
+import { listOwnedProjects } from "@/server/projects";
+
+export const runtime = "nodejs";
 
 export const metadata = {
   title: "Your projects — Trace",
 };
 
 export default async function ProjectsPage() {
-  await auth.protect();
+  // obtain the userId from the auth object
+  const { userId } = await auth();
+  if (!userId) {
+    await auth.protect();
+    return null;
+  }
+
+  // fetch the initial page of projects for the user using userId
+  let initialPage: ProjectPage = { items: [], nextCursor: null };
+  let loadError = false;
+  try {
+    initialPage = await listOwnedProjects(userId, 20, null);
+  } catch {
+    loadError = true;
+  }
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 pb-20 pt-8 sm:px-10">
@@ -28,27 +47,10 @@ export default async function ProjectsPage() {
         <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-lime-300">
           Your workspace
         </p>
-        <h1 className="max-w-2xl text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-          Your projects will live here.
+        <h1 className="mb-10 max-w-2xl text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+          Keep every project in view.
         </h1>
-        <p className="mt-5 max-w-xl text-base leading-7 text-zinc-400">
-          Your account is ready. Project creation and event activity are coming in
-          the next implementation step.
-        </p>
-        <div className="mt-10 max-w-2xl rounded-2xl border border-dashed border-white/15 bg-white/[0.025] p-6 sm:p-8">
-          <div className="flex items-start gap-4">
-            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white/5 text-lime-300" aria-hidden="true">
-              ◇
-            </span>
-            <div>
-              <h2 className="font-medium text-white">Workspace secured</h2>
-              <p className="mt-2 text-sm leading-6 text-zinc-400">
-                This page is available to the signed-in account only. Your account
-                identifier is ready to scope projects to you.
-              </p>
-            </div>
-          </div>
-        </div>
+        <ProjectWorkspace initialPage={initialPage} loadError={loadError} />
       </section>
     </main>
   );
