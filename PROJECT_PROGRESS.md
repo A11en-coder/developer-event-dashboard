@@ -55,4 +55,4 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 
 ## Last implementation checkpoint
 
-- Pending final Git checkpoint for the Clerk authentication capability.
+- `28010c7` — `feat: add Clerk account authentication`
