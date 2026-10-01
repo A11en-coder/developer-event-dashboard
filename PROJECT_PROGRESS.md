@@ -7,9 +7,9 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 ## Current phase and capability
 
 - Phase: WP-01, project foundation and early public gate.
-- Completed capabilities: runtime foundation/local runtime compatibility; Project and ApiKey data model with initial migration; Clerk account authentication and public landing page.
-- Current capability checkpoint: public landing, Clerk sign-up/sign-in/sign-out controls, session-protected project workspace shell. Project CRUD and project data ownership checks remain open.
-- TRD SP-05: pinned toolchain, Prisma client generation, schema validation, ESLint, TypeScript and production build verified locally. Both configured database URLs passed read-only connection checks; the project migration remains unapplied.
+- Completed capabilities: runtime foundation/local runtime compatibility; Project and ApiKey data model and migrations; Clerk account authentication and public landing page; owner-scoped project workspace.
+- Current capability checkpoint: signed-in users can create projects, list them with pagination, and open owner-scoped project details. The API guide, API key lifecycle, event ingestion, and event/request dashboards remain open.
+- TRD SP-05: pinned toolchain, Prisma client generation, schema validation, ESLint, TypeScript, and production build verified. Prisma reports both migrations applied and the database schema up to date on the configured Neon production branch.
 
 ## Completed
 
@@ -19,9 +19,11 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 - Added a minimal PostgreSQL Prisma schema and generated client successfully.
 - Verified clean dependency installation, Prisma generation, ESLint, TypeScript, and production build.
 - Added Project and ApiKey models with UUIDs, Clerk ownership ID, key hash/display metadata, version and lifecycle timestamps, ordered indexes, project cascade relation, unique composite key, and partial unique active-key index.
-- Generated and reviewed the initial SQL migration. It has not been applied to a live or disposable PostgreSQL database.
+- Generated and reviewed the Project/ApiKey and ManagementBucket migrations; both have been applied to the configured Neon production database and verified with `prisma migrate status`.
 - Added ClerkProvider, dedicated sign-in/sign-up routes, Clerk session middleware, and a server-side `auth.protect()` check on `/projects`; sign-up/sign-in redirect into the protected workspace and Clerk's user menu provides sign-out.
 - Replaced the starter landing page with responsive product orientation and entry points. Local HTTP smoke check returned 200 for `/`, `/sign-in`, and `/sign-up`; unauthenticated `/projects` redirected to `/sign-in`.
+- Added the signed-in project workspace, paginated project list, project creation API, and owner-scoped project detail page/API. Project creation uses server-derived Clerk ownership, request validation, same-origin checks, and an atomic per-account minute bucket. Project details expose only safe API-key display metadata.
+- Verified the project capability with ESLint, TypeScript, production build, Prisma migration status, and diff hygiene review.
 - Verified the configured Clerk development secret with a read-only instance request. A complete interactive account signup/signin has not yet been performed; production Clerk setup remains pending.
 
 ## Remaining capabilities
@@ -34,7 +36,7 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 ## Requirements and design references
 
 - Foundation and schema support the approved Next.js, Clerk, Prisma, Neon PostgreSQL, and Vercel design in the TRD; Project and ApiKey fields and indexes follow TRD §9.
-- PRD FR-01 is partially implemented (landing and account entry points; API guide remains). FR-02 authentication/session is implemented; its project ownership enforcement remains pending. FR-03 onward and release NFR evidence remain open.
+- PRD FR-01 is partially implemented (landing, account entry points, project create/list/detail; API guide and public deployment remain). FR-02 account authentication/session and project ownership checks are implemented. Event submission, key lifecycle, activity views, and release NFR evidence remain open.
 - TRD SP-01 uses Clerk development credentials locally. Production Clerk domain, credentials, and fresh-account verification remain deployment work.
 
 ## Approved decisions
@@ -46,13 +48,14 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 ## Known issues and release blockers
 
 - No production domain, production Clerk configuration, Vercel deployment, abuse-control decision, support destination, budget, or recovery evidence has been configured.
-- The configured runtime and migration PostgreSQL URLs connected successfully in read-only checks. The initial migration is still pending and must be applied through a controlled migration step after confirming the target environment.
+- The configured database is the Neon `production` branch. Both migrations are applied and Prisma reports the schema up to date. The authenticated project flow has not yet been exercised end to end with a fresh Clerk account.
 - Docker CLI is installed but its daemon is unavailable in this workspace.
 - Deployment target remains the TRD-approved Vercel path. The user asked whether Docker could be the deployment target, but has not specified local development use versus replacing Vercel; no deployment-plan change has been made.
 - `.env.example` contains placeholders only. Production authentication and deployment integration remain unverified.
-- The Prisma config loader fix that enables the CLI to read `.env.local` is present in the worktree but is being kept out of the Clerk capability commit.
+- `prisma.config.ts` loads `.env.local` through `@next/env`, so Prisma CLI commands use the configured direct `MIGRATION_DATABASE_URL`.
 - The input TRD contains pre-existing trailing whitespace, reported by `git diff --cached --check` when the source document was first committed.
 
 ## Last implementation checkpoint
 
 - `28010c7` — `feat: add Clerk account authentication`
+- `7eca280` — `feat: add owner-scoped project workspace`
