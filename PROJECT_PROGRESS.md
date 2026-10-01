@@ -43,6 +43,7 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 
 - No production domain, Clerk production configuration, Neon resources, Vercel deployment, abuse-control decision, support destination, budget, or recovery evidence has been configured.
 - Docker CLI is installed but its daemon is unavailable in this workspace; no database connection is configured, so the migration has only been statically reviewed and Prisma-generated.
+- Deployment target remains the TRD-approved Vercel path. The user asked whether Docker could be the deployment target, but has not specified local development use versus replacing Vercel; no deployment-plan change has been made.
 - `.env.example` contains placeholders only. Public authentication and database integration remain unverified.
 - The initial page is the unmodified Next.js starter page; product UI is a later capability.
 - The input TRD contains pre-existing trailing whitespace, reported by `git diff --cached --check` when the source document was first committed.
