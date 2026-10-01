@@ -8,6 +8,7 @@ import type {
   ProjectSummary,
 } from "@/lib/project-types";
 import { getPrisma } from "@/server/db";
+import { admitManagementOperation } from "@/server/management-limits";
 
 const projectIdPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -200,52 +201,6 @@ export async function getOwnedProject(
   };
 }
 
-export type ProjectCreateAdmission = {
-  admitted: boolean;
-  retryAfterSeconds: number;
-};
-
-export async function admitProjectCreation(
-  ownerClerkUserId: string,
-): Promise<ProjectCreateAdmission> {
-  const rows = await getPrisma().$queryRaw<ProjectCreateAdmission[]>`
-    WITH clock AS (
-      SELECT clock_timestamp() AS "instant"
-    ),
-    bucket AS (
-      SELECT
-        "instant",
-        date_trunc('minute', "instant" AT TIME ZONE 'UTC') AT TIME ZONE 'UTC' AS "minuteStart"
-      FROM clock
-    ),
-    admission AS (
-      INSERT INTO "ManagementBucket" (
-        "ownerClerkUserId",
-        "operation",
-        "minuteStart",
-        "admittedCount"
-      )
-      SELECT
-        ${ownerClerkUserId},
-        'PROJECT_CREATE'::"ManagementOperation",
-        "minuteStart",
-        1
-      FROM bucket
-      ON CONFLICT ("ownerClerkUserId", "operation", "minuteStart")
-      DO UPDATE SET "admittedCount" = "ManagementBucket"."admittedCount" + 1
-      WHERE "ManagementBucket"."admittedCount" < 10
-      RETURNING "admittedCount"
-    )
-    SELECT
-      EXISTS (SELECT 1 FROM admission) AS "admitted",
-      GREATEST(
-        1,
-        CEIL(EXTRACT(EPOCH FROM (
-          bucket."minuteStart" + INTERVAL '1 minute' - bucket."instant"
-        )))::INTEGER
-      ) AS "retryAfterSeconds"
-    FROM bucket
-  `;
-
-  return rows[0];
+export async function admitProjectCreation(ownerClerkUserId: string) {
+  return admitManagementOperation(getPrisma(), ownerClerkUserId, "PROJECT_CREATE");
 }

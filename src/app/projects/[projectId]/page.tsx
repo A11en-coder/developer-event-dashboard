@@ -2,6 +2,7 @@ import { UserButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ProjectKeyManagement } from "@/components/projects/ProjectKeyManagement";
 import { getOwnedProject } from "@/server/projects";
 
 export const runtime = "nodejs";
@@ -49,17 +50,12 @@ export default async function ProjectPage({
         <p className="mt-4 text-sm text-zinc-500">Created {project.createdAt.slice(0, 10)}</p>
 
         <div className="mt-10 grid gap-4 md:grid-cols-2">
-          <section className="rounded-xl border border-white/[0.08] bg-white/[0.025] p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">API key</p>
-            {project.activeKey ? (
-              <div className="mt-4">
-                <p className="font-mono text-sm text-zinc-200">{project.activeKey.displayHint}</p>
-                <p className="mt-2 text-xs text-zinc-600">Active key metadata · created {project.activeKey.createdAt.slice(0, 10)}</p>
-              </div>
-            ) : (
-              <p className="mt-4 text-sm leading-6 text-zinc-400">No active key yet. Key creation will be available in the next capability.</p>
-            )}
-          </section>
+          <ProjectKeyManagement
+            key={project.keyVersion}
+            projectId={project.id}
+            keyVersion={project.keyVersion}
+            activeKey={project.activeKey}
+          />
           <section className="rounded-xl border border-white/[0.08] bg-white/[0.025] p-6">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Activity</p>
             <p className="mt-4 text-sm leading-6 text-zinc-400">Event and request activity will appear here after ingestion is implemented.</p>

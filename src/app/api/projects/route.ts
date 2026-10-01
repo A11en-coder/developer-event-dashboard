@@ -9,51 +9,9 @@ import {
 } from "@/server/projects";
 import { apiError, apiResponse, isAllowedSameOrigin } from "@/server/api-response";
 import type { ProjectCursor } from "@/lib/project-types";
+import { readStrictJsonObject } from "@/server/api-request";
 
 export const runtime = "nodejs";
-
-type BodyReadResult =
-  | { ok: true; value: unknown }
-  | { ok: false; tooLarge: boolean };
-
-async function readJsonBody(request: Request): Promise<BodyReadResult> {
-  const reader = request.body?.getReader();
-  if (!reader) {
-    return { ok: false, tooLarge: false };
-  }
-
-  const chunks: Uint8Array[] = [];
-  let totalBytes = 0;
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) {
-        break;
-      }
-
-      totalBytes += value.byteLength;
-      if (totalBytes > 1024) {
-        await reader.cancel();
-        return { ok: false, tooLarge: true };
-      }
-      chunks.push(value);
-    }
-
-    const bytes = new Uint8Array(totalBytes);
-    let offset = 0;
-    for (const chunk of chunks) {
-      bytes.set(chunk, offset);
-      offset += chunk.byteLength;
-    }
-
-    return {
-      ok: true,
-      value: JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)),
-    };
-  } catch {
-    return { ok: false, tooLarge: false };
-  }
-}
 
 function parseLimit(value: string | null): number | null {
   if (value === null) {
@@ -124,40 +82,15 @@ export async function POST(request: Request) {
     );
   }
 
-  const contentLength = Number(request.headers.get("content-length") ?? 0);
-  if (contentLength > 1024) {
-    return apiError(413, "BODY_TOO_LARGE", "The request body exceeds 1 KiB.");
-  }
-
-  if (
-    request.headers.get("content-type")?.split(";")[0].trim().toLowerCase() !==
-    "application/json"
-  ) {
-    return apiError(400, "INVALID_BODY", "Send the project name as JSON.");
-  }
-
-  const parsedBody = await readJsonBody(request);
-  if (!parsedBody.ok && parsedBody.tooLarge) {
+  const parsedBody = await readStrictJsonObject(request, ["name"]);
+  if (!parsedBody.ok && parsedBody.reason === "too-large") {
     return apiError(413, "BODY_TOO_LARGE", "The request body exceeds 1 KiB.");
   }
   if (!parsedBody.ok) {
     return apiError(400, "INVALID_BODY", "The request body must be valid JSON.");
   }
-  const body = parsedBody.value;
 
-  if (
-    !body ||
-    typeof body !== "object" ||
-    Array.isArray(body) ||
-    Object.keys(body).length !== 1 ||
-    !Object.hasOwn(body, "name")
-  ) {
-    return apiError(400, "INVALID_BODY", "The request body must contain only a name field.");
-  }
-
-  const name = parseProjectName(
-    (body as Record<string, unknown>).name,
-  );
+  const name = parseProjectName(parsedBody.value.name);
   if (!name) {
     return apiError(
       400,
