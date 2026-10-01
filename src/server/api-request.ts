@@ -7,6 +7,7 @@ export type JsonBodyReadResult =
 export async function readBoundedJsonBody(
   request: Request,
   maximumBytes: number,
+  timeoutMs = 3_000,
 ): Promise<JsonBodyReadResult> {
   const declaredLength = request.headers.get("content-length");
   if (declaredLength && /^\d+$/.test(declaredLength) && Number(declaredLength) > maximumBytes) {
@@ -27,9 +28,14 @@ export async function readBoundedJsonBody(
 
   const chunks: Uint8Array[] = [];
   let totalBytes = 0;
+  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
   try {
+    const timeout = new Promise<never>((_resolve, reject) => {
+      timeoutHandle = setTimeout(() => reject(new Error("Request body read timed out.")), timeoutMs);
+    });
+
     while (true) {
-      const { done, value } = await reader.read();
+      const { done, value } = await Promise.race([reader.read(), timeout]);
       if (done) {
         break;
       }
@@ -54,7 +60,12 @@ export async function readBoundedJsonBody(
       value: JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)),
     };
   } catch {
+    await reader.cancel().catch(() => undefined);
     return { ok: false, reason: "invalid" };
+  } finally {
+    if (timeoutHandle) {
+      clearTimeout(timeoutHandle);
+    }
   }
 }
 

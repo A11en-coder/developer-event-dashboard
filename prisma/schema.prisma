@@ -13,25 +13,32 @@ enum ManagementOperation {
   KEY_MUTATION
 }
 
+enum RequestOutcome {
+  ACCEPTED
+  REJECTED
+}
+
 model Project {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  ownerClerkUserId  String   @db.Text
-  name              String   @db.VarChar(80)
-  createdAt         DateTime @default(now()) @db.Timestamptz(6)
-  keyVersion        Int      @default(0)
-  apiKeys           ApiKey[]
+  id               String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerClerkUserId String          @db.Text
+  name             String          @db.VarChar(80)
+  createdAt        DateTime        @default(now()) @db.Timestamptz(6)
+  keyVersion       Int             @default(0)
+  apiKeys          ApiKey[]
+  requests         RequestRecord[]
 
   @@index([ownerClerkUserId, createdAt(sort: Desc), id(sort: Desc)])
 }
 
 model ApiKey {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  projectId   String    @db.Uuid
-  secretHash  String    @db.Char(64)
-  displayHint String    @db.VarChar(48)
-  createdAt   DateTime  @default(now()) @db.Timestamptz(6)
-  revokedAt   DateTime? @db.Timestamptz(6)
-  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  id          String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId   String          @db.Uuid
+  secretHash  String          @db.Char(64)
+  displayHint String          @db.VarChar(48)
+  createdAt   DateTime        @default(now()) @db.Timestamptz(6)
+  revokedAt   DateTime?       @db.Timestamptz(6)
+  project     Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requests    RequestRecord[]
 
   @@unique([id, projectId])
   @@unique([projectId], where: raw("\"revokedAt\" IS NULL"))
@@ -46,4 +53,23 @@ model ManagementBucket {
 
   @@id([ownerClerkUserId, operation, minuteStart])
   @@index([minuteStart])
+}
+
+model RequestRecord {
+  id         String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId  String         @db.Uuid
+  keyId      String         @db.Uuid
+  receivedAt DateTime       @db.Timestamptz(6)
+  quotaAt    DateTime?      @db.Timestamptz(6)
+  outcome    RequestOutcome
+  httpStatus Int            @db.SmallInt
+  errorCode  String?        @db.VarChar(40)
+  eventName  String?        @db.VarChar(64)
+  project    Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  apiKey     ApiKey         @relation(fields: [keyId, projectId], references: [id, projectId], onDelete: Cascade)
+
+  @@index([projectId, receivedAt(sort: Desc), id(sort: Desc)], map: "RequestRecord_projectId_receivedAt_id_all_idx")
+  @@index([projectId, receivedAt(sort: Desc), id(sort: Desc)], where: raw("\"outcome\" = 'ACCEPTED'"), map: "RequestRecord_projectId_receivedAt_id_accepted_idx")
+  @@index([projectId, quotaAt], where: raw("\"quotaAt\" IS NOT NULL"), map: "RequestRecord_projectId_quotaAt_not_null_idx")
+  @@index([receivedAt, id])
 }
