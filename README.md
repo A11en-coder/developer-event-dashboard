@@ -28,6 +28,6 @@ Copy `.env.example` to `.env.local` when configuring local services. Replace pla
 | `npm run build` | Create a production build |
 | `npm run db:generate` | Generate the Prisma client from `prisma/schema.prisma` |
 
-Prisma runtime connections use `DATABASE_URL`; Prisma migration commands use `MIGRATION_DATABASE_URL`. They are intentionally separate so runtime credentials do not need migration privileges. No database migration is included in this foundation capability.
+Prisma runtime connections use `DATABASE_URL`; Prisma migration commands use `MIGRATION_DATABASE_URL`. They are intentionally separate so runtime credentials do not need migration privileges. Reviewed migration files live under `prisma/migrations`; validate them against an isolated PostgreSQL database before applying them to any shared environment. Never run development or destructive schema commands against production.
 
 See [the TRD](docs/Developer_Event_Dashboard_TRD.md) before configuring shared or production resources.

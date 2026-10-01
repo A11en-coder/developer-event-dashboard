@@ -1,8 +1,34 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["partialIndexes"]
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model Project {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerClerkUserId  String   @db.Text
+  name              String   @db.VarChar(80)
+  createdAt         DateTime @default(now()) @db.Timestamptz(6)
+  keyVersion        Int      @default(0)
+  apiKeys           ApiKey[]
+
+  @@index([ownerClerkUserId, createdAt(sort: Desc), id(sort: Desc)])
+}
+
+model ApiKey {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId   String    @db.Uuid
+  secretHash  String    @db.Char(64)
+  displayHint String    @db.VarChar(48)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(6)
+  revokedAt   DateTime? @db.Timestamptz(6)
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([id, projectId])
+  @@unique([projectId], where: raw("\"revokedAt\" IS NULL"))
+  @@index([projectId, createdAt(sort: Desc), id(sort: Desc)])
 }
