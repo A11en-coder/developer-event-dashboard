@@ -8,8 +8,11 @@ type ProjectActivityProps = {
 
 function formatUtc(value: string): string {
   return new Intl.DateTimeFormat("en-AU", {
-    dateStyle: "medium",
-    timeStyle: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
     timeZone: "UTC",
     timeZoneName: "short",
   }).format(new Date(value));
