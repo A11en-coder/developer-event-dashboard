@@ -31,20 +31,26 @@ export default async function ProjectsPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 pb-20 pt-8 sm:px-10">
+      <a
+        href="#workspace-content"
+        className="sr-only rounded-md bg-lime-300 px-3 py-2 font-medium text-zinc-950 focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+      >
+        Skip to projects
+      </a>
       <header className="flex items-center justify-between border-b border-white/10 pb-6">
-        <Link href="/" className="flex items-center gap-3 font-semibold tracking-tight">
+        <Link href="/" className="flex items-center gap-3 font-semibold tracking-tight focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-lime-300">
           <span className="grid size-9 place-items-center rounded-xl bg-lime-300 text-sm font-black text-zinc-950">
             T
           </span>
           Trace
         </Link>
         <div className="flex items-center gap-3">
-          <span className="hidden text-xs text-zinc-500 sm:block">Signed in</span>
+          <span className="hidden text-xs text-zinc-400 sm:block">Signed in</span>
           <UserButton />
         </div>
       </header>
 
-      <section className="flex flex-1 flex-col justify-center py-16">
+      <section id="workspace-content" tabIndex={-1} className="flex flex-1 flex-col justify-center py-16 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-lime-300">
         <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-lime-300">
           Your workspace
         </p>

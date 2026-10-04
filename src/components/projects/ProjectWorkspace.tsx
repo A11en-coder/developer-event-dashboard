@@ -118,11 +118,11 @@ export function ProjectWorkspace({
             <h2 id="projects-heading" className="text-lg font-semibold text-white">
               Projects
             </h2>
-            <p className="mt-1 text-sm text-zinc-500">
+            <p className="mt-1 text-sm text-zinc-400">
               Each project has its own events and API key.
             </p>
           </div>
-          <span className="shrink-0 text-xs text-zinc-600">Most recent first</span>
+          <span className="shrink-0 text-xs text-zinc-400">Most recent first</span>
         </div>
 
         {loadError ? (
@@ -133,7 +133,7 @@ export function ProjectWorkspace({
         ) : projects.length === 0 ? (
           <div className="rounded-xl border border-dashed border-white/15 bg-white/[0.02] p-6 sm:p-8">
             <p className="font-medium text-white">No projects yet</p>
-            <p className="mt-2 text-sm leading-6 text-zinc-500">
+            <p className="mt-2 text-sm leading-6 text-zinc-400">
               Create your first project to give your events a home.
             </p>
           </div>
@@ -143,7 +143,7 @@ export function ProjectWorkspace({
               <li key={project.id}>
                 <Link
                   href={"/projects/" + encodeURIComponent(project.id)}
-                  className="group flex items-center justify-between gap-4 rounded-xl border border-white/[0.08] bg-white/[0.025] p-5 transition hover:border-lime-300/30 hover:bg-white/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-lime-300"
+                  className="group flex min-h-11 items-center justify-between gap-4 rounded-xl border border-white/[0.08] bg-white/[0.025] p-5 transition hover:border-lime-300/30 hover:bg-white/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-300"
                 >
                   <span className="flex min-w-0 items-center gap-4">
                     <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[0.04] text-sm font-semibold text-lime-200">
@@ -153,7 +153,7 @@ export function ProjectWorkspace({
                       <span className="block truncate font-medium text-white">
                         {project.name}
                       </span>
-                      <span className="mt-1 block text-xs text-zinc-600">
+                      <span className="mt-1 block text-xs text-zinc-400">
                         Created {project.createdAt.slice(0, 10)}
                       </span>
                     </span>
@@ -178,7 +178,7 @@ export function ProjectWorkspace({
               type="button"
               onClick={handleLoadMore}
               disabled={loadingMore}
-              className="rounded-lg border border-white/10 px-4 py-2.5 text-sm text-zinc-300 transition hover:border-white/25 hover:text-white disabled:cursor-wait disabled:opacity-50"
+              className="inline-flex min-h-11 items-center rounded-lg border border-white/10 px-4 py-2.5 text-sm text-zinc-300 transition hover:border-white/25 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-300 disabled:cursor-wait disabled:opacity-50"
             >
               {loadingMore ? "Loading…" : "Load more projects"}
             </button>
@@ -188,7 +188,7 @@ export function ProjectWorkspace({
 
       <aside className="h-fit rounded-xl border border-white/[0.08] bg-white/[0.025] p-5 sm:p-6">
         <h2 className="font-semibold text-white">Create a project</h2>
-        <p className="mt-2 text-sm leading-6 text-zinc-500">
+        <p className="mt-2 text-sm leading-6 text-zinc-400">
           Choose a name that helps you recognize the app or service.
         </p>
         <form className="mt-5 space-y-4" onSubmit={handleCreate}>
@@ -201,12 +201,13 @@ export function ProjectWorkspace({
               name="name"
               autoComplete="off"
               required
+              aria-describedby="project-name-hint"
               value={name}
               onChange={(event) => setName(event.target.value)}
               placeholder="e.g. My Website"
-              className="h-11 w-full rounded-lg border border-white/10 bg-black/20 px-3 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-lime-300/60 focus:ring-2 focus:ring-lime-300/15"
+              className="h-11 w-full rounded-lg border border-white/10 bg-black/20 px-3 text-sm text-white transition placeholder:text-zinc-600 focus:border-lime-300/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-300"
             />
-            <p className="mt-2 text-xs text-zinc-600">1–80 characters after trimming.</p>
+            <p id="project-name-hint" className="mt-2 text-xs text-zinc-400">1–80 characters after trimming.</p>
           </div>
           {error && (
             <p role="alert" className="text-sm leading-5 text-amber-200">
@@ -216,12 +217,15 @@ export function ProjectWorkspace({
           <button
             type="submit"
             disabled={creating || !name.trim()}
-            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-lime-300 px-4 text-sm font-semibold text-zinc-950 transition hover:bg-lime-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-lime-300 px-4 text-sm font-semibold text-zinc-950 transition hover:bg-lime-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {creating ? "Creating…" : "Create project"}
           </button>
+          <p role="status" className="sr-only">
+            {creating ? "Creating project." : ""}
+          </p>
         </form>
-        <p className="mt-4 text-xs leading-5 text-zinc-600">
+        <p className="mt-4 text-xs leading-5 text-zinc-400">
           Project names can’t be edited or deleted in this early version.
         </p>
       </aside>

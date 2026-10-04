@@ -6,10 +6,10 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 
 ## Current phase and capability
 
-- Phase: WP-03, retention and release safeguards.
-- Last completed capability: upstream abuse-control selection and log-only Vercel Firewall draft review. The draft is staged on the `developer-event-dashboard` project, but not published.
-- Completed capabilities: runtime foundation/local runtime compatibility; Project and ApiKey data model and migrations; Clerk account authentication and public landing page; owner-scoped project workspace; API-key issuance, revocation, and replacement; public event ingestion with attributable outcomes and project-wide rolling admission; public API guide; owner-scoped 30-day activity dashboard and read APIs; scheduled retention cleanup implementation; privacy and support pages; Vercel Firewall upstream abuse-control decision and staged log-only rule.
-- Current capability checkpoint: signed-in owners can create/list projects, view project details, issue one active key, revoke it, and replace it. Developers can submit named events through `POST /api/v1/events`; accepted events and attributable rejections are stored in `RequestRecord`. Project details show a consistent 30-day activity snapshot, with authenticated paginated read APIs. A `CRON_SECRET`-protected internal endpoint is scheduled daily at 02:00 UTC to purge expired history and old management buckets. Public privacy/support pages are available, with the contact channel supplied through `SUPPORT_URL`.
+- Phase: WP-04, accessibility and release evidence.
+- Last completed capability: accessible, mobile-friendly project workspace implementation. Browser review at 360px/200% zoom and the full keyboard acceptance pass remain open.
+- Completed capabilities: runtime foundation/local runtime compatibility; Project and ApiKey data model and migrations; Clerk account authentication and public landing page; owner-scoped project workspace; API-key issuance, revocation, and replacement; public event ingestion with attributable outcomes and project-wide rolling admission; public API guide; owner-scoped 30-day activity dashboard and read APIs; scheduled retention cleanup implementation; privacy and support pages; Vercel Firewall upstream abuse-control decision and staged log-only rule; accessibility and mobile improvements for project workspace controls.
+- Current capability checkpoint: signed-in owners can create/list projects, view project details, issue one active key, revoke it, and replace it. Developers can submit named events through `POST /api/v1/events`; accepted events and attributable rejections are stored in `RequestRecord`. Project details show a consistent 30-day activity snapshot, with authenticated paginated read APIs. A `CRON_SECRET`-protected internal endpoint is scheduled daily at 02:00 UTC to purge expired history and old management buckets. Public privacy/support pages are available, with the contact channel supplied through `SUPPORT_URL`. The workspace now includes skip links, visible keyboard focus, 44px minimum controls, higher-contrast secondary text, accessible field/status feedback, narrow-screen text wrapping, and reduced-motion support.
 - TRD SP-05: pinned toolchain, Prisma client generation, schema validation, ESLint, TypeScript, and production build verified. The first three migrations were previously verified up to date. The user reports applying the retention migration; this runtime's follow-up status check failed with a generic schema-engine error, so that report could not be independently confirmed here.
 
 ## Completed
@@ -41,18 +41,20 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 - Updated the API guide to describe the implemented dashboard and daily cleanup policy. Verified the privacy/support capability with TypeScript, ESLint, production build, and diff review. `SUPPORT_URL` has no actual destination configured yet; the support page makes this explicit until deployment configuration is supplied.
 - Verified the configured Clerk development secret with a read-only instance request. A complete interactive account signup/signin has not yet been performed; production Clerk setup remains pending.
 - Selected Vercel Firewall IP-based rate limiting as the shared upstream abuse control. Staged and reviewed `rule_event_ingestion_ip_rate_observation_EkZKJt` for `POST /api/v1/events`, with a 60-second fixed window, 600 requests per IP, and log-only over-limit action. The draft is not published, has not affected production, and has not observed production traffic.
+- Improved the signed-in project list and detail experience for keyboard, assistive technology, and narrow viewports: skip links and focus indicators; at-least-44px interactive targets; form descriptions and operation status announcements; clearer secondary text; event-name wrapping; and reduced-motion handling. Verified with ESLint, TypeScript, production build, and `git diff --check`; no tests were added or run. Browser checks at 360px, desktop, 200% zoom, and keyboard/dialog flow remain part of release acceptance.
 
 ## Remaining capabilities
 
 1. Complete WP-01: complete the early public deployment gate and rehearse migrations against isolated PostgreSQL.
 2. WP-03: publish the approved Vercel Firewall log-only rule when ready to observe deployed traffic; configure the production support destination; deploy and verify the scheduled cleanup job.
-3. WP-04: accessibility/mobile review, complete CI and acceptance evidence, migration/recovery rehearsal, and release decision.
+3. WP-04: browser accessibility/mobile review at 360px, desktop, and 200% zoom; keyboard/focus-flow acceptance; complete CI and remaining acceptance evidence; migration/recovery rehearsal; and release decision.
 
 ## Requirements and design references
 
 - Foundation and schema support the approved Next.js, Clerk, Prisma, Neon PostgreSQL, and Vercel design in the TRD; Project and ApiKey fields and indexes follow TRD §9.
 - PRD FR-01 is partially implemented (landing, account entry points, project create/list/detail, and public API guide; public deployment remains). FR-02 account authentication/session and project ownership checks are implemented. FR-04/FR-05 key issuance and revoke/replace flows are implemented. FR-06/FR-07 event submission and attributable outcomes, FR-08/FR-09 30-day activity views and reads, FR-10 API guidance, and the TRD-approved retention cleanup implementation are complete. NFR-08 demo/privacy content is implemented; public support destination, deployed cleanup evidence, and other release NFR evidence remain open.
 - TRD SP-01 uses Clerk development credentials locally. Production Clerk domain, credentials, and fresh-account verification remain deployment work.
+- PRD NFR-06 and TRD T-12: workspace code improvements are implemented and passed lint/type/build checks. Viewport, zoom, reduced-motion, and full keyboard-flow evidence still needs browser review.
 
 ## Approved decisions
 

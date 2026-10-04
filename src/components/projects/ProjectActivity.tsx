@@ -52,7 +52,7 @@ export function ProjectActivity({
             Past 30 days
           </h2>
         </div>
-        <p className="text-xs text-zinc-500">
+        <p className="text-xs text-zinc-400">
           Window ends {formatUtc(snapshot.window.to)}
         </p>
       </div>
@@ -67,7 +67,7 @@ export function ProjectActivity({
       <div className="grid gap-4 xl:grid-cols-2">
         <section className="rounded-xl border border-white/[0.08] bg-white/[0.025] p-5 sm:p-6">
           <h3 className="text-sm font-semibold text-white">Events by name</h3>
-          <p className="mt-1 text-xs text-zinc-500">Top event names by accepted count</p>
+          <p className="mt-1 text-xs text-zinc-400">Top event names by accepted count</p>
           {snapshot.eventCounts.length === 0 ? (
             <EmptyState>No accepted events in this 30-day window.</EmptyState>
           ) : (
@@ -75,7 +75,7 @@ export function ProjectActivity({
               {snapshot.eventCounts.map((event) => (
                 <li key={event.name}>
                   <div className="flex items-center justify-between gap-3 text-sm">
-                    <span className="truncate font-mono text-zinc-300">{event.name}</span>
+                    <span className="min-w-0 truncate font-mono text-zinc-300">{event.name}</span>
                     <span className="shrink-0 tabular-nums text-zinc-400">{event.count}</span>
                   </div>
                   <div
@@ -95,7 +95,7 @@ export function ProjectActivity({
 
         <section className="rounded-xl border border-white/[0.08] bg-white/[0.025] p-5 sm:p-6">
           <h3 className="text-sm font-semibold text-white">Recent events</h3>
-          <p className="mt-1 text-xs text-zinc-500">Latest accepted event submissions</p>
+          <p className="mt-1 text-xs text-zinc-400">Latest accepted event submissions</p>
           {snapshot.recentEvents.length === 0 ? (
             <EmptyState>Accepted events will appear here after your first submission.</EmptyState>
           ) : (
@@ -105,10 +105,10 @@ export function ProjectActivity({
                   key={event.id}
                   className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                 >
-                  <span className="truncate font-mono text-sm text-zinc-300">{event.name}</span>
+                  <span className="min-w-0 truncate font-mono text-sm text-zinc-300 sm:flex-1">{event.name}</span>
                   <time
                     dateTime={event.receivedAt}
-                    className="shrink-0 text-xs text-zinc-500"
+                    className="shrink-0 text-xs text-zinc-400"
                   >
                     {formatUtc(event.receivedAt)}
                   </time>
@@ -122,11 +122,11 @@ export function ProjectActivity({
           <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h3 className="text-sm font-semibold text-white">Recent requests</h3>
-              <p className="mt-1 text-xs text-zinc-500">
+              <p className="mt-1 text-xs text-zinc-400">
                 Accepted and attributable rejected outcomes
               </p>
             </div>
-            <p className="text-xs text-zinc-600">Times shown in UTC</p>
+            <p className="text-xs text-zinc-400">Times shown in UTC</p>
           </div>
           {snapshot.recentRequests.length === 0 ? (
             <EmptyState>No attributable requests in this 30-day window.</EmptyState>
@@ -153,7 +153,7 @@ export function ProjectActivity({
                   </span>
                   <time
                     dateTime={request.receivedAt}
-                    className="text-xs text-zinc-500 sm:text-right"
+                    className="text-xs text-zinc-400 sm:text-right"
                   >
                     {formatUtc(request.receivedAt)}
                   </time>
@@ -163,7 +163,7 @@ export function ProjectActivity({
           )}
         </section>
       </div>
-      <p className="text-xs leading-5 text-zinc-600">
+      <p className="text-xs leading-5 text-zinc-400">
         Records exactly 30 days old are outside this window. Unknown or incorrect
         keys are not attributable and do not appear here.
       </p>
@@ -189,7 +189,7 @@ function SummaryCard({
 
   return (
     <div className="rounded-xl border border-white/[0.08] bg-white/[0.025] p-5">
-      <p className="text-xs font-medium uppercase tracking-[0.14em] text-zinc-500">
+      <p className="text-xs font-medium uppercase tracking-[0.14em] text-zinc-400">
         {label}
       </p>
       <p className={`mt-3 text-3xl font-semibold tracking-tight tabular-nums ${valueColor}`}>
@@ -201,6 +201,6 @@ function SummaryCard({
 
 function EmptyState({ children }: { children: ReactNode }) {
   return (
-    <p className="py-8 text-center text-sm leading-6 text-zinc-500">{children}</p>
+    <p className="py-8 text-center text-sm leading-6 text-zinc-400">{children}</p>
   );
 }

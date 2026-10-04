@@ -132,9 +132,12 @@ export function ProjectKeyManagement({
       aria-labelledby="project-key-heading"
       className="rounded-xl border border-white/[0.08] bg-white/[0.025] p-6"
     >
+      <p role="status" className="sr-only">
+        {busy ? "Processing API key change." : ""}
+      </p>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
             Project credential
           </p>
           <h2 id="project-key-heading" className="mt-2 font-semibold text-white">
@@ -163,14 +166,14 @@ export function ProjectKeyManagement({
             <button
               type="button"
               onClick={copyKey}
-              className="rounded-lg bg-lime-300 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition hover:bg-lime-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-300"
+              className="inline-flex min-h-11 items-center rounded-lg bg-lime-300 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition hover:bg-lime-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-300"
             >
               Copy key
             </button>
             <button
               type="button"
               onClick={dismissOneTimeKey}
-              className="rounded-lg border border-white/10 px-4 py-2.5 text-sm text-zinc-300 transition hover:border-white/25 hover:text-white"
+              className="inline-flex min-h-11 items-center rounded-lg border border-white/10 px-4 py-2.5 text-sm text-zinc-300 transition hover:border-white/25 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-300"
             >
               I’ve saved it — close
             </button>
@@ -180,7 +183,7 @@ export function ProjectKeyManagement({
       ) : activeKey ? (
         <div className="mt-5">
           <p className="font-mono text-sm text-zinc-200">{activeKey.displayHint}</p>
-          <p className="mt-2 text-xs text-zinc-600">
+          <p className="mt-2 text-xs text-zinc-400">
             Created {activeKey.createdAt.slice(0, 10)}. The full secret is not stored and cannot be shown again.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
@@ -188,7 +191,7 @@ export function ProjectKeyManagement({
               type="button"
               disabled={busy}
               onClick={() => setConfirming("replace")}
-              className="rounded-lg border border-amber-300/20 px-4 py-2.5 text-sm text-amber-100 transition hover:border-amber-300/40 disabled:cursor-wait disabled:opacity-50"
+              className="inline-flex min-h-11 items-center rounded-lg border border-amber-300/20 px-4 py-2.5 text-sm text-amber-100 transition hover:border-amber-300/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-300 disabled:cursor-wait disabled:opacity-50"
             >
               Replace key
             </button>
@@ -196,7 +199,7 @@ export function ProjectKeyManagement({
               type="button"
               disabled={busy}
               onClick={() => setConfirming("revoke")}
-              className="rounded-lg border border-white/10 px-4 py-2.5 text-sm text-zinc-300 transition hover:border-white/25 hover:text-white disabled:cursor-wait disabled:opacity-50"
+              className="inline-flex min-h-11 items-center rounded-lg border border-white/10 px-4 py-2.5 text-sm text-zinc-300 transition hover:border-white/25 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-300 disabled:cursor-wait disabled:opacity-50"
             >
               Revoke key
             </button>
@@ -211,7 +214,7 @@ export function ProjectKeyManagement({
             type="button"
             disabled={busy}
             onClick={() => void performAction("issue")}
-            className="mt-4 rounded-lg bg-lime-300 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition hover:bg-lime-200 disabled:cursor-wait disabled:opacity-50"
+            className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-lime-300 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition hover:bg-lime-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-300 disabled:cursor-wait disabled:opacity-50"
           >
             {busy ? "Creating key…" : "Create API key"}
           </button>
@@ -220,10 +223,10 @@ export function ProjectKeyManagement({
 
       {confirming && !oneTimeKey && (
         <section
-          aria-label={`Confirm key ${confirming}`}
+          aria-labelledby="key-confirmation-heading"
           className="mt-5 rounded-lg border border-amber-300/20 bg-amber-300/[0.05] p-4"
         >
-          <h3 className="font-medium text-amber-100">
+          <h3 id="key-confirmation-heading" className="font-medium text-amber-100">
             {confirming === "replace" ? "Replace the active key?" : "Revoke the active key?"}
           </h3>
           <p className="mt-2 text-sm leading-5 text-amber-100/70">
@@ -231,12 +234,12 @@ export function ProjectKeyManagement({
               ? "The current key will stop authorizing new requests as soon as replacement succeeds. The new secret will only be shown once."
               : "The current key will stop authorizing new requests as soon as revocation succeeds. This cannot be undone."}
           </p>
-          <div className="mt-4 flex gap-3">
+          <div className="mt-4 flex flex-wrap gap-3">
             <button
               type="button"
               disabled={busy}
               onClick={() => void performAction(confirming)}
-              className="rounded-lg bg-amber-200 px-4 py-2 text-sm font-semibold text-zinc-950 disabled:opacity-50"
+              className="inline-flex min-h-11 items-center rounded-lg bg-amber-200 px-4 py-2 text-sm font-semibold text-zinc-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:opacity-50"
             >
               {busy ? "Saving…" : confirming === "replace" ? "Confirm replacement" : "Confirm revocation"}
             </button>
@@ -244,7 +247,7 @@ export function ProjectKeyManagement({
               type="button"
               disabled={busy}
               onClick={() => setConfirming(null)}
-              className="rounded-lg border border-white/10 px-4 py-2 text-sm text-zinc-300 disabled:opacity-50"
+              className="inline-flex min-h-11 items-center rounded-lg border border-white/10 px-4 py-2 text-sm text-zinc-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-300 disabled:opacity-50"
             >
               Cancel
             </button>
