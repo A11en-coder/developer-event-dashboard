@@ -7,7 +7,8 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 ## Current phase and capability
 
 - Phase: WP-03, retention and release safeguards.
-- Completed capabilities: runtime foundation/local runtime compatibility; Project and ApiKey data model and migrations; Clerk account authentication and public landing page; owner-scoped project workspace; API-key issuance, revocation, and replacement; public event ingestion with attributable outcomes and project-wide rolling admission; public API guide; owner-scoped 30-day activity dashboard and read APIs; scheduled retention cleanup implementation; privacy and support pages.
+- Last completed capability: upstream abuse-control selection and log-only Vercel Firewall draft review. The draft is staged on the `developer-event-dashboard` project, but not published.
+- Completed capabilities: runtime foundation/local runtime compatibility; Project and ApiKey data model and migrations; Clerk account authentication and public landing page; owner-scoped project workspace; API-key issuance, revocation, and replacement; public event ingestion with attributable outcomes and project-wide rolling admission; public API guide; owner-scoped 30-day activity dashboard and read APIs; scheduled retention cleanup implementation; privacy and support pages; Vercel Firewall upstream abuse-control decision and staged log-only rule.
 - Current capability checkpoint: signed-in owners can create/list projects, view project details, issue one active key, revoke it, and replace it. Developers can submit named events through `POST /api/v1/events`; accepted events and attributable rejections are stored in `RequestRecord`. Project details show a consistent 30-day activity snapshot, with authenticated paginated read APIs. A `CRON_SECRET`-protected internal endpoint is scheduled daily at 02:00 UTC to purge expired history and old management buckets. Public privacy/support pages are available, with the contact channel supplied through `SUPPORT_URL`.
 - TRD SP-05: pinned toolchain, Prisma client generation, schema validation, ESLint, TypeScript, and production build verified. The first three migrations were previously verified up to date. The user reports applying the retention migration; this runtime's follow-up status check failed with a generic schema-engine error, so that report could not be independently confirmed here.
 
@@ -39,11 +40,12 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 - Added a public privacy notice covering Clerk identity references, project/key metadata, event and attributable outcome data, the live 30-day policy, data-minimization guidance, and the separate retention scope for logs and backups. Added a support page with a deployment-configured HTTPS or `mailto:` destination and a safe fallback when unset; shared footer links are available from the landing page, API guide, project list, and project details.
 - Updated the API guide to describe the implemented dashboard and daily cleanup policy. Verified the privacy/support capability with TypeScript, ESLint, production build, and diff review. `SUPPORT_URL` has no actual destination configured yet; the support page makes this explicit until deployment configuration is supplied.
 - Verified the configured Clerk development secret with a read-only instance request. A complete interactive account signup/signin has not yet been performed; production Clerk setup remains pending.
+- Selected Vercel Firewall IP-based rate limiting as the shared upstream abuse control. Staged and reviewed `rule_event_ingestion_ip_rate_observation_EkZKJt` for `POST /api/v1/events`, with a 60-second fixed window, 600 requests per IP, and log-only over-limit action. The draft is not published, has not affected production, and has not observed production traffic.
 
 ## Remaining capabilities
 
 1. Complete WP-01: complete the early public deployment gate and rehearse migrations against isolated PostgreSQL.
-2. WP-03: choose upstream abuse controls; configure the production support destination; deploy and verify the scheduled cleanup job.
+2. WP-03: publish the approved Vercel Firewall log-only rule when ready to observe deployed traffic; configure the production support destination; deploy and verify the scheduled cleanup job.
 3. WP-04: accessibility/mobile review, complete CI and acceptance evidence, migration/recovery rehearsal, and release decision.
 
 ## Requirements and design references
@@ -57,10 +59,11 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 - D-01: Clerk production authentication on an owned domain.
 - D-02: exact 30-day visible history with daily physical cleanup and at most 25-hour normal-operation lag.
 - D-03: approved validation, rolling admission, engineering, and recovery baseline.
+- D-04: use a Vercel Firewall IP-based rate-limit rule for `POST /api/v1/events` as the upstream shared abuse control. Begin with a 600 requests / 60 seconds per-IP threshold in log-only mode; do not enforce until real traffic is reviewed and enforcement is separately approved.
 
 ## Known issues and release blockers
 
-- No production domain, production Clerk configuration, Vercel deployment, abuse-control decision, support destination, budget, or recovery evidence has been configured. `SUPPORT_URL`, production `CRON_SECRET`, and an actual scheduled invocation remain unverified.
+- No production domain, production Clerk configuration, Vercel deployment, support destination, budget, or recovery evidence has been configured. `SUPPORT_URL`, production `CRON_SECRET`, and an actual scheduled invocation remain unverified. The reviewed abuse-control draft (`rule_event_ingestion_ip_rate_observation_EkZKJt`) is documented in `docs/operations/vercel-firewall.md`. The rule is not published, so it has not affected production or recorded traffic.
 - The configured database is the Neon `production` branch. The user reports applying the fourth migration (`20261004100000_retention_maintenance`); this runtime's read-only Prisma status check failed with a generic schema-engine error. Authenticated project/key mutations, event ingestion, and cleanup still need end-to-end verification in a disposable development/preview database and fresh Clerk account; production was not used for application-flow verification.
 - Docker CLI is installed but its daemon is unavailable in this workspace.
 - Deployment target remains the TRD-approved Vercel path. The user asked whether Docker could be the deployment target, but has not specified local development use versus replacing Vercel; no deployment-plan change has been made.
