@@ -103,7 +103,9 @@ function WorkspaceHeader() {
       </Link>
       <div className="flex items-center gap-3">
         <Link href="/projects" className="inline-flex min-h-11 items-center px-2 text-sm text-zinc-300 transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-300">Projects</Link>
-        <UserButton />
+        <span className="inline-flex rounded-full focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-lime-300">
+          <UserButton />
+        </span>
       </div>
     </header>
   );

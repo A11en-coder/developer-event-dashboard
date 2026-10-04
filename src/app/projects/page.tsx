@@ -46,7 +46,9 @@ export default async function ProjectsPage() {
         </Link>
         <div className="flex items-center gap-3">
           <span className="hidden text-xs text-zinc-400 sm:block">Signed in</span>
-          <UserButton />
+          <span className="inline-flex rounded-full focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-lime-300">
+            <UserButton />
+          </span>
         </div>
       </header>
 
