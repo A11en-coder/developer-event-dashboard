@@ -55,6 +55,12 @@ model ManagementBucket {
   @@index([minuteStart])
 }
 
+model MaintenanceState {
+  name             String    @id @db.Text
+  lastSuccessAt    DateTime? @db.Timestamptz(6)
+  lastDeletedCount BigInt    @default(0)
+}
+
 model RequestRecord {
   id         String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   projectId  String         @db.Uuid
