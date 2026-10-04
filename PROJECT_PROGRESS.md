@@ -81,3 +81,4 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 - `02f9765` — `feat: add project activity dashboard`
 - `b1e214e` — `feat: add scheduled retention cleanup`
 - `b007e04` — `feat: add privacy and support pages`
+- `b466480` — `docs: record staged Vercel abuse-control rule`
