@@ -2,7 +2,10 @@ import { UserButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { ActivitySnapshot } from "@/lib/activity-types";
+import { ProjectActivity } from "@/components/projects/ProjectActivity";
 import { ProjectKeyManagement } from "@/components/projects/ProjectKeyManagement";
+import { getOwnedActivitySnapshot } from "@/server/activity";
 import { getOwnedProject } from "@/server/projects";
 
 export const runtime = "nodejs";
@@ -29,7 +32,7 @@ export default async function ProjectPage({
         <section className="flex flex-1 flex-col justify-center py-16">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-lime-300">Project</p>
           <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">Project data is temporarily unavailable.</h1>
-          <p className="mt-3 max-w-xl text-sm leading-6 text-zinc-500">Refresh this page in a moment. If the issue continues, check that the project database migration has been applied.</p>
+          <p className="mt-3 max-w-xl text-sm leading-6 text-zinc-500">Refresh this page in a moment. If the issue continues, contact support.</p>
           <Link href="/projects" className="mt-7 w-fit rounded-lg border border-white/10 px-4 py-2.5 text-sm text-zinc-300 transition hover:border-white/25 hover:text-white">Back to projects</Link>
         </section>
       </main>
@@ -37,6 +40,18 @@ export default async function ProjectPage({
   }
 
   if (!project) {
+    notFound();
+  }
+
+  let activity: ActivitySnapshot | null = null;
+  let activityUnavailable = false;
+  try {
+    activity = await getOwnedActivitySnapshot(userId, projectId);
+  } catch {
+    activityUnavailable = true;
+  }
+
+  if (!activity && !activityUnavailable) {
     notFound();
   }
 
@@ -56,10 +71,9 @@ export default async function ProjectPage({
             keyVersion={project.keyVersion}
             activeKey={project.activeKey}
           />
-          <section className="rounded-xl border border-white/[0.08] bg-white/[0.025] p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Activity</p>
-            <p className="mt-4 text-sm leading-6 text-zinc-400">Event and request activity will appear here after ingestion is implemented.</p>
-          </section>
+        </div>
+        <div className="mt-8">
+          <ProjectActivity snapshot={activity} unavailable={activityUnavailable} />
         </div>
       </section>
     </main>
