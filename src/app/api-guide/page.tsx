@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SiteFooter } from "@/components/SiteFooter";
 
 export const metadata: Metadata = {
   title: "API Guide — Trace",
@@ -268,10 +269,11 @@ Content-Type: application/json
                   can leave the result uncertain, so do not retry automatically.
                 </li>
                 <li>
-                  The product&apos;s event and request history window is 30 days;
-                  dashboard history and automated cleanup are separate
-                  capabilities still being implemented. Events are backend
-                  submissions only; browser collection is unsupported.
+                  The product&apos;s event and request history window is 30 days.
+                  The dashboard shows retained history, and expired live
+                  records are scheduled for daily cleanup with up to 25 hours
+                  of normal-operation lag. Events are backend submissions
+                  only; browser collection is unsupported.
                 </li>
               </ul>
             </div>
@@ -279,17 +281,9 @@ Content-Type: application/json
         </section>
       </div>
 
-      <footer className="mt-16 flex flex-col gap-3 border-t border-white/10 pt-6 text-sm sm:flex-row sm:items-center sm:justify-between">
-        <Link href="/" className="text-zinc-400 transition hover:text-white">
-          ← Back to Trace
-        </Link>
-        <Link
-          href="/sign-up"
-          className="font-medium text-lime-200 transition hover:text-lime-100"
-        >
-          Create your first project <span aria-hidden="true">→</span>
-        </Link>
-      </footer>
+      <div className="mt-16">
+        <SiteFooter />
+      </div>
     </main>
   );
 }

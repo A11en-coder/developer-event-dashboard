@@ -2,6 +2,7 @@ import { UserButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { SiteFooter } from "@/components/SiteFooter";
 import type { ActivitySnapshot } from "@/lib/activity-types";
 import { ProjectActivity } from "@/components/projects/ProjectActivity";
 import { ProjectKeyManagement } from "@/components/projects/ProjectKeyManagement";
@@ -76,6 +77,7 @@ export default async function ProjectPage({
           <ProjectActivity snapshot={activity} unavailable={activityUnavailable} />
         </div>
       </section>
+      <SiteFooter />
     </main>
   );
 }

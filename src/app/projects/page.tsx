@@ -1,6 +1,7 @@
 import { UserButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
+import { SiteFooter } from "@/components/SiteFooter";
 import { ProjectWorkspace } from "@/components/projects/ProjectWorkspace";
 import type { ProjectPage } from "@/lib/project-types";
 import { listOwnedProjects } from "@/server/projects";
@@ -52,6 +53,7 @@ export default async function ProjectsPage() {
         </h1>
         <ProjectWorkspace initialPage={initialPage} loadError={loadError} />
       </section>
+      <SiteFooter />
     </main>
   );
 }

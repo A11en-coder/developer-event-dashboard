@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SiteFooter } from "@/components/SiteFooter";
 
 export default function Home() {
   return (
@@ -67,7 +68,7 @@ export default function Home() {
           ))}
         </div>
       </section>
-      <footer className="flex flex-col gap-2 border-t border-white/10 py-6 text-xs text-zinc-600 sm:flex-row sm:items-center sm:justify-between"><span>Trace is a portfolio demonstration.</span><span>Events should be named actions, never personal information.</span></footer>
+      <SiteFooter />
     </main>
   );
 }
