@@ -7,8 +7,8 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 ## Current phase and capability
 
 - Phase: WP-02, event ingestion and dashboard.
-- Completed capabilities: runtime foundation/local runtime compatibility; Project and ApiKey data model and migrations; Clerk account authentication and public landing page; owner-scoped project workspace; API-key issuance, revocation, and replacement; public event ingestion with attributable outcomes and project-wide rolling admission; public API guide.
-- Current capability checkpoint: signed-in owners can create/list projects, view project details, issue one active key, revoke it, and replace it. Developers can submit named events through `POST /api/v1/events`; accepted events and attributable rejections are stored in `RequestRecord`. The public API guide is available at `/api-guide`. Dashboard read/views remain open.
+- Completed capabilities: runtime foundation/local runtime compatibility; Project and ApiKey data model and migrations; Clerk account authentication and public landing page; owner-scoped project workspace; API-key issuance, revocation, and replacement; public event ingestion with attributable outcomes and project-wide rolling admission; public API guide; owner-scoped 30-day activity dashboard and read APIs.
+- Current capability checkpoint: signed-in owners can create/list projects, view project details, issue one active key, revoke it, and replace it. Developers can submit named events through `POST /api/v1/events`; accepted events and attributable rejections are stored in `RequestRecord`. The public API guide is available at `/api-guide`. Project details show a consistent 30-day activity snapshot, with authenticated paginated APIs for its summary, event counts, accepted events, and request outcomes.
 - TRD SP-05: pinned toolchain, Prisma client generation, schema validation, ESLint, TypeScript, and production build verified. Prisma found all three migrations and reported the configured Neon database schema up to date on 4 October 2026.
 
 ## Completed
@@ -30,20 +30,22 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 - Added project-row-locked rolling admission at 60 active-key attempts per 60 seconds, shared across key replacement and app instances. The `RequestRecord` migration includes outcome constraints, project/key foreign keys, and the recent-view, accepted-event, admission, and cleanup indexes.
 - Verified the ingestion capability with Prisma schema validation/client generation, TypeScript, ESLint, production build, and diff review. The user applied its migration to the configured Neon database and a later status check confirmed it; no authenticated ingestion request was run against production.
 - Added a public API guide with PowerShell/curl setup, event validation rules, success/error examples, key-safety guidance, rate limit, retry behavior, and the 30-day history policy. Linked it from the landing-page navigation and primary action. Updated example event names to match the validator's underscore format.
-- Verified the API guide with TypeScript, ESLint, production build, and diff review. The guide distinguishes the implemented ingestion endpoint from dashboard history and automated cleanup, which remain future capabilities.
+- Verified the API guide with TypeScript, ESLint, production build, and diff review. The guide describes the ingestion endpoint; dashboard history is now available in the project workspace, while automated cleanup remains future work.
+- Added an owner-scoped project activity dashboard showing 30-day request totals, accepted/rejected outcomes, event counts by name, recent accepted events, and recent attributable request outcomes. A failed activity read is displayed as unavailable rather than as zero activity.
+- Added authenticated, project-owner-scoped summary, event-count, recent-event, and recent-request read APIs. Paginated endpoints use bounded limits, endpoint/project-bound cursors, stable ordering, and a fixed 30-day snapshot window.
+- Verified this capability with TypeScript, ESLint, and `git diff --check`. The production build reached Next.js font retrieval but could not fetch the existing Geist and Geist Mono Google Fonts because this environment could not establish the network connection. No schema or migration changes were needed.
 - Verified the configured Clerk development secret with a read-only instance request. A complete interactive account signup/signin has not yet been performed; production Clerk setup remains pending.
 
 ## Remaining capabilities
 
 1. Complete WP-01: complete the early public deployment gate and rehearse migrations against isolated PostgreSQL.
-2. Complete WP-02: add initial and retained dashboard reads for event/request history and grouped event counts.
-3. WP-03: retention cleanup, privacy/support content, and upstream abuse controls.
-4. WP-04: accessibility/mobile review, complete CI and acceptance evidence, migration/recovery rehearsal, and release decision.
+2. WP-03: retention cleanup, privacy/support content, and upstream abuse controls.
+3. WP-04: accessibility/mobile review, complete CI and acceptance evidence, migration/recovery rehearsal, and release decision.
 
 ## Requirements and design references
 
 - Foundation and schema support the approved Next.js, Clerk, Prisma, Neon PostgreSQL, and Vercel design in the TRD; Project and ApiKey fields and indexes follow TRD §9.
-- PRD FR-01 is partially implemented (landing, account entry points, project create/list/detail, and public API guide; public deployment remains). FR-02 account authentication/session and project ownership checks are implemented. FR-04/FR-05 key issuance and revoke/replace flows are implemented. FR-06/FR-07 event submission and attributable outcomes plus FR-10 API guidance are implemented; FR-08/FR-09 activity views and release NFR evidence remain open.
+- PRD FR-01 is partially implemented (landing, account entry points, project create/list/detail, and public API guide; public deployment remains). FR-02 account authentication/session and project ownership checks are implemented. FR-04/FR-05 key issuance and revoke/replace flows are implemented. FR-06/FR-07 event submission and attributable outcomes, FR-08/FR-09 30-day activity views and reads, and FR-10 API guidance are implemented; retention cleanup and release NFR evidence remain open.
 - TRD SP-01 uses Clerk development credentials locally. Production Clerk domain, credentials, and fresh-account verification remain deployment work.
 
 ## Approved decisions
@@ -69,3 +71,4 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 - `db87061` — `feat: add project API key lifecycle`
 - `96d0fd1` — `feat: add public event ingestion`
 - `a3f3cef` — `feat: add public event API guide`
+- `02f9765` — `feat: add project activity dashboard`
