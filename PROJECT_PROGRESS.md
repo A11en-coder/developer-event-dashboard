@@ -7,8 +7,8 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 ## Current phase and capability
 
 - Phase: WP-03, retention and release safeguards.
-- Completed capabilities: runtime foundation/local runtime compatibility; Project and ApiKey data model and migrations; Clerk account authentication and public landing page; owner-scoped project workspace; API-key issuance, revocation, and replacement; public event ingestion with attributable outcomes and project-wide rolling admission; public API guide; owner-scoped 30-day activity dashboard and read APIs; scheduled retention cleanup implementation.
-- Current capability checkpoint: signed-in owners can create/list projects, view project details, issue one active key, revoke it, and replace it. Developers can submit named events through `POST /api/v1/events`; accepted events and attributable rejections are stored in `RequestRecord`. Project details show a consistent 30-day activity snapshot, with authenticated paginated read APIs. A `CRON_SECRET`-protected internal endpoint is scheduled daily at 02:00 UTC to purge expired history and old management buckets.
+- Completed capabilities: runtime foundation/local runtime compatibility; Project and ApiKey data model and migrations; Clerk account authentication and public landing page; owner-scoped project workspace; API-key issuance, revocation, and replacement; public event ingestion with attributable outcomes and project-wide rolling admission; public API guide; owner-scoped 30-day activity dashboard and read APIs; scheduled retention cleanup implementation; privacy and support pages.
+- Current capability checkpoint: signed-in owners can create/list projects, view project details, issue one active key, revoke it, and replace it. Developers can submit named events through `POST /api/v1/events`; accepted events and attributable rejections are stored in `RequestRecord`. Project details show a consistent 30-day activity snapshot, with authenticated paginated read APIs. A `CRON_SECRET`-protected internal endpoint is scheduled daily at 02:00 UTC to purge expired history and old management buckets. Public privacy/support pages are available, with the contact channel supplied through `SUPPORT_URL`.
 - TRD SP-05: pinned toolchain, Prisma client generation, schema validation, ESLint, TypeScript, and production build verified. The first three migrations were previously verified up to date. The user reports applying the retention migration; this runtime's follow-up status check failed with a generic schema-engine error, so that report could not be independently confirmed here.
 
 ## Completed
@@ -30,24 +30,26 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 - Added project-row-locked rolling admission at 60 active-key attempts per 60 seconds, shared across key replacement and app instances. The `RequestRecord` migration includes outcome constraints, project/key foreign keys, and the recent-view, accepted-event, admission, and cleanup indexes.
 - Verified the ingestion capability with Prisma schema validation/client generation, TypeScript, ESLint, production build, and diff review. The user applied its migration to the configured Neon database and a later status check confirmed it; no authenticated ingestion request was run against production.
 - Added a public API guide with PowerShell/curl setup, event validation rules, success/error examples, key-safety guidance, rate limit, retry behavior, and the 30-day history policy. Linked it from the landing-page navigation and primary action. Updated example event names to match the validator's underscore format.
-- Verified the API guide with TypeScript, ESLint, production build, and diff review. The guide describes the ingestion endpoint; dashboard history is now available in the project workspace, while automated cleanup remains future work.
+- Verified the API guide with TypeScript, ESLint, production build, and diff review. The guide describes the ingestion endpoint; dashboard history and scheduled cleanup are implemented, while deployed cleanup verification remains open.
 - Added an owner-scoped project activity dashboard showing 30-day request totals, accepted/rejected outcomes, event counts by name, recent accepted events, and recent attributable request outcomes. A failed activity read is displayed as unavailable rather than as zero activity.
 - Added authenticated, project-owner-scoped summary, event-count, recent-event, and recent-request read APIs. Paginated endpoints use bounded limits, endpoint/project-bound cursors, stable ordering, and a fixed 30-day snapshot window.
 - Verified this capability with TypeScript, ESLint, and `git diff --check`. Its initial production build attempt could not fetch the existing Google Fonts; a later full production build completed successfully during retention cleanup verification. No schema or migration changes were needed for the dashboard capability.
 - Added `MaintenanceState` and its migration, plus a protected `GET /api/internal/retention` job scheduled daily at 02:00 UTC. It uses a transaction-scoped advisory lock, a fixed database cutoff, 1,000-row deletion batches capped at 10,000 request records per invocation, 25-hour management-bucket cleanup, and marks success only when no expired request records remain.
 - Verified retention cleanup with Prisma client generation/schema validation, TypeScript, ESLint, production build, Vercel schedule JSON parsing, and diff review. The user reports that the migration was applied; the subsequent read-only status attempt in this runtime returned a generic schema-engine error. The cleanup job itself has not been run against a database, and no deployed scheduled invocation has been verified.
+- Added a public privacy notice covering Clerk identity references, project/key metadata, event and attributable outcome data, the live 30-day policy, data-minimization guidance, and the separate retention scope for logs and backups. Added a support page with a deployment-configured HTTPS or `mailto:` destination and a safe fallback when unset; shared footer links are available from the landing page, API guide, project list, and project details.
+- Updated the API guide to describe the implemented dashboard and daily cleanup policy. Verified the privacy/support capability with TypeScript, ESLint, production build, and diff review. `SUPPORT_URL` has no actual destination configured yet; the support page makes this explicit until deployment configuration is supplied.
 - Verified the configured Clerk development secret with a read-only instance request. A complete interactive account signup/signin has not yet been performed; production Clerk setup remains pending.
 
 ## Remaining capabilities
 
 1. Complete WP-01: complete the early public deployment gate and rehearse migrations against isolated PostgreSQL.
-2. WP-03: privacy/support content and upstream abuse controls; deploy and verify the scheduled cleanup job.
+2. WP-03: choose upstream abuse controls; configure the production support destination; deploy and verify the scheduled cleanup job.
 3. WP-04: accessibility/mobile review, complete CI and acceptance evidence, migration/recovery rehearsal, and release decision.
 
 ## Requirements and design references
 
 - Foundation and schema support the approved Next.js, Clerk, Prisma, Neon PostgreSQL, and Vercel design in the TRD; Project and ApiKey fields and indexes follow TRD §9.
-- PRD FR-01 is partially implemented (landing, account entry points, project create/list/detail, and public API guide; public deployment remains). FR-02 account authentication/session and project ownership checks are implemented. FR-04/FR-05 key issuance and revoke/replace flows are implemented. FR-06/FR-07 event submission and attributable outcomes, FR-08/FR-09 30-day activity views and reads, FR-10 API guidance, and the TRD-approved retention cleanup implementation are complete; physical cleanup execution evidence and other release NFR evidence remain open.
+- PRD FR-01 is partially implemented (landing, account entry points, project create/list/detail, and public API guide; public deployment remains). FR-02 account authentication/session and project ownership checks are implemented. FR-04/FR-05 key issuance and revoke/replace flows are implemented. FR-06/FR-07 event submission and attributable outcomes, FR-08/FR-09 30-day activity views and reads, FR-10 API guidance, and the TRD-approved retention cleanup implementation are complete. NFR-08 demo/privacy content is implemented; public support destination, deployed cleanup evidence, and other release NFR evidence remain open.
 - TRD SP-01 uses Clerk development credentials locally. Production Clerk domain, credentials, and fresh-account verification remain deployment work.
 
 ## Approved decisions
@@ -58,7 +60,7 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 
 ## Known issues and release blockers
 
-- No production domain, production Clerk configuration, Vercel deployment, abuse-control decision, support destination, budget, or recovery evidence has been configured. Production `CRON_SECRET` configuration and an actual scheduled invocation are also unverified.
+- No production domain, production Clerk configuration, Vercel deployment, abuse-control decision, support destination, budget, or recovery evidence has been configured. `SUPPORT_URL`, production `CRON_SECRET`, and an actual scheduled invocation remain unverified.
 - The configured database is the Neon `production` branch. The user reports applying the fourth migration (`20261004100000_retention_maintenance`); this runtime's read-only Prisma status check failed with a generic schema-engine error. Authenticated project/key mutations, event ingestion, and cleanup still need end-to-end verification in a disposable development/preview database and fresh Clerk account; production was not used for application-flow verification.
 - Docker CLI is installed but its daemon is unavailable in this workspace.
 - Deployment target remains the TRD-approved Vercel path. The user asked whether Docker could be the deployment target, but has not specified local development use versus replacing Vercel; no deployment-plan change has been made.
@@ -75,3 +77,4 @@ Developer Event Dashboard. The approved PRD and TRD are in `docs/`. The workspac
 - `a3f3cef` — `feat: add public event API guide`
 - `02f9765` — `feat: add project activity dashboard`
 - `b1e214e` — `feat: add scheduled retention cleanup`
+- `b007e04` — `feat: add privacy and support pages`
